@@ -96,7 +96,8 @@ body, .stApp {
 /* Estimated delivery time and output - Grey Font */
 .metric-value {
     font-weight: bold !important;
-    color: #D8D8D8 !important; /* Light Gray */
+    color: #F5F5F5 !important; /* Warm White / Off White */ /* Changed metric value color to White */
+    text-shadow: 1px 1px 1px #D8D8D8 !important; /* Light Gray border to font */ /* Added grey border to font */
     margin-left: 5px !important;
 }
 </style>
