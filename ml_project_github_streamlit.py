@@ -22,10 +22,15 @@ st.set_page_config(layout="wide", page_title="Zomato Delivery Time Predictor", p
 # Custom CSS for Zomato theme and metric cards
 st.markdown("""
 <style>
-/* Main app container */
-.stApp {
+/* Apply dark red background and white text to the entire body and main app container */
+body, .stApp {
     background-color: #A8232C !important; /* Zomato Dark Red */
     color: #F5F5F5 !important; /* Warm White / Off White */
+}
+
+/* Ensure text within various elements is white */
+.stApp, .stApp label, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6, .stApp .st-emotion-cache-1vbky99, .st-emotion-cache-10trukw, .st-emotion-cache-16z7h0f {
+     color: #F5F5F5 !important; /* Warm White / Off White */
 }
 
 /* Sidebar */
@@ -34,16 +39,10 @@ st.markdown("""
     color: #F5F5F5 !important; /* Warm White / Off White */
 }
 
-/* Sidebar header */
-.st-emotion-cache-1wivap2 { /* Target sidebar header */
+/* Sidebar header and text within sidebar */
+.st-emotion-cache-1wivap2, .st-emotion-cache-1l269gk label, .st-emotion-cache-1l269gk .st-emotion-cache-1vbky99 {
     color: #F5F5F5 !important; /* Warm White / Off White */
 }
-
-/* General text color */
-.st-emotion-cache-1vbky99 {
-    color: #F5F5F5 !important; /* Warm White / Off White */
-}
-
 
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
@@ -82,6 +81,7 @@ label {
     margin-bottom: 15px !important;
     box-shadow: 2px 2px 10px rgba(0,0,0,0.1) !important;
     background-color: #F5F5F5 !important; /* Warm White / Off White */
+    color: #2D2D2D !important; /* Charcoal / Text Gray */
 }
 .bank-card-header {
     font-weight: bold !important;
@@ -154,7 +154,7 @@ try:
     if predict_button:
         input_data = pd.DataFrame({
             'Distance_Km': [distance], 'Traffic': [traffic], 'Weather': [weather],
-            'Time_of_Day': [time_of_day],
+            'Time_of_Day': [time_of_Day],
             'Restaurant_Popularity': [restaurant_popularity], 'Rider_Experience': [rider_experience],
             'Vehicle_Type': [vehicle_type]
         })
