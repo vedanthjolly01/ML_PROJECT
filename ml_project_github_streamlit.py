@@ -113,9 +113,10 @@ def load_and_preprocess_data(file_path):
     df = pd.read_csv(file_path)
     df = df.rename(columns={'Distance_km':'Distance_Km', 'Order_Value_INR': 'Order_Value', 'Rider_Experience_years' : 'Rider_Experience',  'Delivery_Time_min': 'Delivery_Time'})
 
-    categorical_cols = ['Traffic', 'Weather', 'Time_of_Day', 'Cuisine_Type', 'Restaurant_Popularity', 'Vehicle_Type']
+    categorical_cols = ['Traffic', 'Weather', 'Time_of_Day', 'Restaurant_Popularity', 'Vehicle_Type'] # Removed Cuisine_Type
+    cols_to_drop = ['Delivery_Time', 'Order_Size', 'Order_Value', 'Cuisine_Type'] # Added Order_Size, Order_Value, Cuisine_Type
 
-    x_raw = df.drop(columns=['Delivery_Time']) # Removed unwanted columns
+    x_raw = df.drop(columns=[col for col in cols_to_drop if col in df.columns]) # Removed unwanted columns
     y = df['Delivery_Time']
     x = pd.get_dummies(x_raw, columns=[col for col in categorical_cols if col in x_raw.columns], drop_first=False) # Removed unwanted columns from one-hot encoding
 
@@ -138,12 +139,9 @@ try:
 
     st.sidebar.header("Delivery Details")
     distance = st.sidebar.number_input("Distance (km)", float(df['Distance_Km'].min()), float(df['Distance_Km'].max()), float(df['Distance_Km'].mean()))
-    order_size = st.sidebar.number_input("Order Size", int(df['Order_Size'].min()), int(df['Order_Size'].max()), int(df['Order_Size'].mean()))
     traffic = st.sidebar.selectbox("Traffic", df['Traffic'].unique())
     weather = st.sidebar.selectbox("Weather", df['Weather'].unique())
     time_of_day = st.sidebar.selectbox("Time of Day", df['Time_of_Day'].unique())
-    cuisine_type = st.sidebar.selectbox("Cuisine Type", df['Cuisine_Type'].unique())
-    order_value = st.sidebar.number_input("Order Value (INR)", int(df['Order_Value'].min()), int(df['Order_Value'].max()), int(df['Order_Value'].mean()))
     restaurant_popularity = st.sidebar.selectbox("Restaurant Popularity", df['Restaurant_Popularity'].unique())
     rider_experience = st.sidebar.slider("Rider Experience (years)", int(df['Rider_Experience'].min()), int(df['Rider_Experience'].max()), int(df['Rider_Experience'].mean()))
     vehicle_type = st.sidebar.selectbox("Vehicle Type", df['Vehicle_Type'].unique())
@@ -160,10 +158,9 @@ try:
     # Prediction section
     if predict_button:
         input_data = pd.DataFrame({
-            'Distance_Km': [distance], 'Order_Size': [order_size], 'Traffic': [traffic], 'Weather': [weather],
-            'Time_of_Day': [time_of_day], 'Cuisine_Type': [cuisine_type], 'Order_Value': [order_value],
-            'Restaurant_Popularity': [restaurant_popularity], 'Rider_Experience': [rider_experience],
-            'Vehicle_Type': [vehicle_type]
+            'Distance_Km': [distance], 'Traffic': [traffic], 'Weather': [weather],
+            'Time_of_Day': [time_of_day], 'Restaurant_Popularity': [restaurant_popularity],
+            'Rider_Experience': [rider_experience], 'Vehicle_Type': [vehicle_type]
         })
 
         # Recreate the dummy columns based on the original training data's columns
