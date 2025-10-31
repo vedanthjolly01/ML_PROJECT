@@ -7,6 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1bJBYxuhuDpd3QPhO2zuO6vXE8S8_TCcl
 """
 
+# Commented out IPython magic to ensure Python compatibility.
+# %pip install streamlit
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -112,9 +115,9 @@ def load_and_preprocess_data(file_path):
 
     categorical_cols = ['Traffic', 'Weather', 'Time_of_Day', 'Cuisine_Type', 'Restaurant_Popularity', 'Vehicle_Type']
 
-    x_raw = df.drop(columns=['Delivery_Time', 'Order_Size', 'Order_Value', 'Cuisine_Type']) # Removed unwanted columns
+    x_raw = df.drop(columns=['Delivery_Time']) # Removed unwanted columns
     y = df['Delivery_Time']
-    x = pd.get_dummies(x_raw, columns=[col for col in categorical_cols if col in x_raw.columns and col not in ['Order_Size', 'Order_Value', 'Cuisine_Type']], drop_first=False) # Removed unwanted columns from one-hot encoding
+    x = pd.get_dummies(x_raw, columns=[col for col in categorical_cols if col in x_raw.columns], drop_first=False) # Removed unwanted columns from one-hot encoding
 
     return df, x, y
 
@@ -135,12 +138,16 @@ try:
 
     st.sidebar.header("Delivery Details")
     distance = st.sidebar.number_input("Distance (km)", float(df['Distance_Km'].min()), float(df['Distance_Km'].max()), float(df['Distance_Km'].mean()))
+    order_size = st.sidebar.number_input("Order Size", int(df['Order_Size'].min()), int(df['Order_Size'].max()), int(df['Order_Size'].mean()))
     traffic = st.sidebar.selectbox("Traffic", df['Traffic'].unique())
     weather = st.sidebar.selectbox("Weather", df['Weather'].unique())
     time_of_day = st.sidebar.selectbox("Time of Day", df['Time_of_Day'].unique())
+    cuisine_type = st.sidebar.selectbox("Cuisine Type", df['Cuisine_Type'].unique())
+    order_value = st.sidebar.number_input("Order Value (INR)", int(df['Order_Value'].min()), int(df['Order_Value'].max()), int(df['Order_Value'].mean()))
     restaurant_popularity = st.sidebar.selectbox("Restaurant Popularity", df['Restaurant_Popularity'].unique())
     rider_experience = st.sidebar.slider("Rider Experience (years)", int(df['Rider_Experience'].min()), int(df['Rider_Experience'].max()), int(df['Rider_Experience'].mean()))
     vehicle_type = st.sidebar.selectbox("Vehicle Type", df['Vehicle_Type'].unique())
+
 
     predict_button = st.sidebar.button("Predict Delivery Time", use_container_width=True)
 
@@ -153,8 +160,8 @@ try:
     # Prediction section
     if predict_button:
         input_data = pd.DataFrame({
-            'Distance_Km': [distance], 'Traffic': [traffic], 'Weather': [weather],
-            'Time_of_Day': [time_of_day],  # Corrected variable name
+            'Distance_Km': [distance], 'Order_Size': [order_size], 'Traffic': [traffic], 'Weather': [weather],
+            'Time_of_Day': [time_of_day], 'Cuisine_Type': [cuisine_type], 'Order_Value': [order_value],
             'Restaurant_Popularity': [restaurant_popularity], 'Rider_Experience': [rider_experience],
             'Vehicle_Type': [vehicle_type]
         })
