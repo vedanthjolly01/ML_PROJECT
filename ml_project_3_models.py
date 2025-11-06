@@ -29,10 +29,10 @@ st.markdown("""
         html, body {{
             font-family: 'Times New Roman', serif !important;
             color: white; /* Ensure default text color is white */
-            background-color: #A8232C !important; /* Apply red to html and body */
+            background-color: #E23744 !important; /* Apply specified red to html and body */
         }}
         .stApp {{
-            background-color: #A8232C !important; /* Zomato Dark Red */
+            background-color: #E23744 !important; /* Apply specified red to stApp */
             color: white;
         }}
         .stSidebar {{
