@@ -26,13 +26,13 @@ st.set_page_config(page_title="Zomato Delivery Time Predictor", layout="wide") #
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
-        html, body, [class*="st-"] {{
+        html, body {{
             font-family: 'Times New Roman', serif !important;
             color: white; /* Ensure default text color is white */
+            background-color: #A8232C !important; /* Apply red to html and body */
         }}
-        /* Apply red background to the main content area and the entire app */
         .stApp {{
-            background-color: #A8232C; /* Zomato Dark Red */
+            background-color: #A8232C !important; /* Zomato Dark Red */
             color: white;
         }}
         .stSidebar {{
