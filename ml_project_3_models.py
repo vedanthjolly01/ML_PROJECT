@@ -150,14 +150,14 @@ except Exception as e:
 # ----------------------------
 def adjust_prediction_by_distance(prediction, distance):
     if distance >= 0 and distance <= 6:
-        # If prediction is less than 0, set to 0. If greater than 40, set to 40. Otherwise keep original.
-        return max(0, min(prediction, 40))
+        # If prediction is within 0-40, return it. Otherwise, cap.
+        return prediction if 0 <= prediction <= 40 else max(0, min(prediction, 40))
     elif distance > 6 and distance <= 13:
-        # If prediction is less than 40, set to 40. If greater than 80, set to 80. Otherwise keep original.
-        return max(40, min(prediction, 80))
+        # If prediction is within 40-80, return it. Otherwise, cap.
+        return prediction if 40 <= prediction <= 80 else max(40, min(prediction, 80))
     elif distance > 13 and distance <= 19.99:
-        # If prediction is less than 80, set to 80. If greater than 120, set to 120. Otherwise keep original.
-        return max(80, min(prediction, 120))
+        # If prediction is within 80-120, return it. Otherwise, cap.
+        return prediction if 80 <= prediction <= 120 else max(80, min(prediction, 120))
     else:
         return prediction # Return original prediction for distances outside these ranges
 
