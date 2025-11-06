@@ -146,20 +146,17 @@ except Exception as e:
     data_loaded_and_models_trained = False
 
 # ----------------------------
-# Function to adjust prediction based on distance ranges
+# Function to determine prediction range
 # ----------------------------
-def adjust_prediction_by_distance(prediction, distance):
-    if distance >= 0 and distance <= 6:
-        # If prediction is within 0-40, return it. Otherwise, cap.
-        return prediction if 0 <= prediction <= 40 else max(0, min(prediction, 40))
-    elif distance > 6 and distance <= 13:
-        # If prediction is within 40-80, return it. Otherwise, cap.
-        return prediction if 40 <= prediction <= 80 else max(40, min(prediction, 80))
-    elif distance > 13 and distance <= 19.99:
-        # If prediction is within 80-120, return it. Otherwise, cap.
-        return prediction if 80 <= prediction <= 120 else max(80, min(prediction, 120))
+def get_prediction_range(prediction):
+    if prediction >= 0 and prediction <= 40:
+        return "0-40 mins"
+    elif prediction > 40 and prediction <= 80:
+        return "40-80 mins"
+    elif prediction > 80 and prediction <= 120:
+        return "80-120 mins"
     else:
-        return prediction # Return original prediction for distances outside these ranges
+        return "Outside standard ranges"
 
 
 # ----------------------------
@@ -204,25 +201,25 @@ if data_loaded_and_models_trained:
 
 
     # ----------------------------
-    # 🎯 Predict and Adjust
+    # 🎯 Predict
     # ----------------------------
     if st.button("Predict Delivery Time"):
-        lin_pred_raw = lin_model.predict(input_encoded)[0]
-        rf_pred_raw = rf_model.predict(input_encoded)[0]
-        xgb_pred_raw = xgb_model.predict(input_encoded)[0]
+        lin_pred = lin_model.predict(input_encoded)[0]
+        rf_pred = rf_model.predict(input_encoded)[0]
+        xgb_pred = xgb_model.predict(input_encoded)[0]
 
-        # Adjust predictions based on distance ranges
-        lin_pred_adjusted = adjust_prediction_by_distance(lin_pred_raw, distance)
-        rf_pred_adjusted = adjust_prediction_by_distance(rf_pred_raw, distance)
-        xgb_pred_adjusted = adjust_prediction_by_distance(xgb_pred_raw, distance)
+        # Determine the range for each prediction
+        lin_range = get_prediction_range(lin_pred)
+        rf_range = get_prediction_range(rf_pred)
+        xgb_range = get_prediction_range(xgb_pred)
 
 
         st.markdown("<h2>🕒 Predicted Delivery Times</h2>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred_adjusted:.2f} minutes</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred:.2f} minutes<br>({lin_range})</div>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred_adjusted:.2f} minutes</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred:.2f} minutes<br>({rf_range})</div>", unsafe_allow_html=True)
         with col3:
-            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred_adjusted:.2f} minutes</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred:.2f} minutes<br>({xgb_range})</div>", unsafe_allow_html=True)
