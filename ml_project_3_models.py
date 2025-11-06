@@ -25,56 +25,67 @@ import xgboost as xgb
 st.set_page_config(page_title="Zomato Delivery Time Predictor", layout="wide") # Using layout wide for better use of space
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
-        html, body {{
-            font-family: 'Times New Roman', serif !important;
-            color: white; /* Ensure default text color is white */
-            background-color: #E23744 !important; /* Apply specified red to html and body */
-        }}
-        .stApp {{
-            background-color: #E23744 !important; /* Apply specified red to stApp */
-            color: white;
-        }}
-        .stSidebar {{
-            background-color: white !important; /* White background for sidebar */
-            color: #A8232C !important; /* Dark Red text for sidebar */
-        }}
-        .stSelectbox label, .stNumberInput label, .stButton>button {{
-            color: white !important; /* Labels and button text in white */
-            font-size: 18px;
-        }}
-         .stSelectbox div[data-baseweb="select"] > div {{
-            color: #cb202d !important; /* Selected item in selectbox */
-        }}
-         .stTextInput>div>div>input {{
-            color: white !important; /* Input text in white */
-         }}
-        .prediction-card {{
-            background-color: white;
-            color: #A8232C !important; /* Prediction card text in Zomato Dark Red */
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            font-size: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            margin-bottom: 20px; /* Add some space below cards */
-        }}
+/* Apply Times New Roman font to all text */
+body, .stApp, .stApp label, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6, .stApp .st-emotion-cache-1vbky99, .st-emotion-cache-10trukw, .st-emotion-cache-16z7h0f, .st-emotion-cache-1l269gk label, .st-emotion-cache-1l269gk .st-emotion-cache-1vbky99, .st-emotion-cache-1l269gk .stButton button, .bank-card, .bank-card-header, .metric-label, .metric-value {
+    font-family: "Times New Roman", Times, serif !important;
+}
 
-        /* Ensure text within prediction cards is Zomato Dark Red */
-        .prediction-card b, .prediction-card {{
-            color: #A8232C !important;
-        }}
+/* Main app container - Dark Red Background, White Font, Grey Border to Font */
+body, .stApp {
+    background-color: #A8232C !important; /* Zomato Dark Red */
+    color: #F5F5F5 !important; /* Warm White / Off White */
+}
 
-        h1, h2, h3, h4, h5, h6 {{
-            text-align: center;
-            font-family: 'Times New Roman', serif !important;
-            color: white !important; /* Headings in white */
-        }}
-        /* Ensure text elements in the main content area are white */
-        .main .block-container, .css-j080pf, .css-10trgqc, .stMarkdown p {{
-            color: white !important;
-        }}
-    </style>
+/* Apply grey border to font on main page elements where appropriate */
+.stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6, .stApp label, .stApp .st-emotion-cache-1vbky99, .st-emotion-cache-10trukw, .st-emotion-cache-16z7h0f {
+    text-shadow: 1px 1px 1px #D8D8D8 !important; /* Light Gray border to font */
+}
+
+
+/* Sidebar - Grey Background, White Font, Dark Red Border to Font */
+.st-emotion-cache-1l269gk { /* Target sidebar container */
+    background-color: #D8D8D8 !important; /* Light Gray */
+    color: #F5F5F5 !important; /* Warm White / Off White */
+}
+
+/* Sidebar header and text within sidebar - White Font, Dark Red Border to Font */
+.st-emotion-cache-1wivap2, .st-emotion-cache-1l269gk label, .st-emotion-cache-1l269gk .st-emotion-cache-1vbky99, .st-emotion-cache-1l269gk .stButton button {
+    color: #F5F5F5 !important; /* Warm White / Off White */
+    text-shadow: 1px 1px 1px #A8232C !important; /* Zomato Dark Red border to font */
+}
+
+
+/* Buttons - Zomato Red Background, White Font */
+.stButton button {
+    background-color: #E23744 !important; /* Zomato Red (Primary) */
+    color: #F5F5F5 !important; /* Warm White / Off White */
+    border: none !important;
+    padding: 10px 20px !important;
+    border-radius: 20px !important;
+}
+
+/* Prediction Cards - White Background, Red Font */
+.prediction-card {{
+    background-color: #F5F5F5 !important; /* Warm White / Off White */
+    color: #A8232C !important; /* Zomato Dark Red */
+    border-radius: 15px !important;
+    padding: 20px !important;
+    text-align: center !important;
+    font-size: 20px !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+}}
+
+/* Ensure text within prediction cards is Zomato Dark Red */
+.prediction-card b, .prediction-card {{
+    color: #A8232C !important;
+}}
+
+/* Specific selectors for text elements to ensure white on red background */
+.main .block-container, .css-j080pf, .css-10trgqc, .stMarkdown p {{
+    color: white !important;
+}}
+
+</style>
 """, unsafe_allow_html=True)
 
 # ----------------------------
