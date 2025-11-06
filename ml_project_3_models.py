@@ -22,7 +22,7 @@ import xgboost as xgb
 # ----------------------------
 # 🌈 Zomato Theme & Page Setup
 # ----------------------------
-st.set_page_config(page_title="Zomato Delivery Time Predictor", layout="centered")
+st.set_page_config(page_title="Zomato Delivery Time Predictor", layout="wide") # Using layout wide for better use of space
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
@@ -30,13 +30,14 @@ st.markdown("""
             font-family: 'Times New Roman', serif !important;
             color: white; /* Ensure default text color is white */
         }}
+        /* Apply red background to the main content area and the entire app */
         .stApp {{
-            background-color: #A8232C !important; /* Use !important to ensure override */
+            background-color: #A8232C; /* Zomato Dark Red */
             color: white;
         }}
         .stSidebar {{
-            background-color: #D8D8D8 !important; /* Light Gray */
-            color: #F5F5F5 !important; /* Warm White / Off White */
+            background-color: white !important; /* White background for sidebar */
+            color: #A8232C !important; /* Dark Red text for sidebar */
         }}
         .stSelectbox label, .stNumberInput label, .stButton>button {{
             color: white !important; /* Labels and button text in white */
@@ -56,6 +57,7 @@ st.markdown("""
             text-align: center;
             font-size: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 20px; /* Add some space below cards */
         }}
 
         /* Ensure text within prediction cards is Zomato Dark Red */
@@ -68,16 +70,9 @@ st.markdown("""
             font-family: 'Times New Roman', serif !important;
             color: white !important; /* Headings in white */
         }}
-        /* More specific selector for the main content area */
-        .main .block-container {{
-            background-color: #A8232C !important;
-            color: white;
-        }}
-        .css-j080pf, .css-10trgqc {{ /* Specific selectors for text elements */
+        /* Ensure text elements in the main content area are white */
+        .main .block-container, .css-j080pf, .css-10trgqc, .stMarkdown p {{
             color: white !important;
-        }}
-        .stMarkdown p {{
-            color: white !important; /* Ensure markdown text is white */
         }}
     </style>
 """, unsafe_allow_html=True)
@@ -145,19 +140,6 @@ except Exception as e:
     st.error(f"An error occurred during data loading or model training: {e}")
     data_loaded_and_models_trained = False
 
-# ----------------------------
-# Function to determine prediction range
-# ----------------------------
-def get_prediction_range(prediction):
-    if prediction >= 0 and prediction <= 40:
-        return "0-40 mins"
-    elif prediction > 40 and prediction <= 80:
-        return "40-80 mins"
-    elif prediction > 80 and prediction <= 120:
-        return "80-120 mins"
-    else:
-        return "Outside standard ranges"
-
 
 # ----------------------------
 # 🧾 User Inputs
@@ -208,18 +190,13 @@ if data_loaded_and_models_trained:
         rf_pred = rf_model.predict(input_encoded)[0]
         xgb_pred = xgb_model.predict(input_encoded)[0]
 
-        # Determine the range for each prediction
-        lin_range = get_prediction_range(lin_pred)
-        rf_range = get_prediction_range(rf_pred)
-        xgb_range = get_prediction_range(xgb_pred)
-
 
         st.markdown("<h2>🕒 Predicted Delivery Times</h2>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred:.2f} minutes<br>({lin_range})</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred:.2f} minutes</div>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred:.2f} minutes<br>({rf_range})</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred:.2f} minutes</div>", unsafe_allow_html=True)
         with col3:
-            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred:.2f} minutes<br>({xgb_range})</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred:.2f} minutes</div>", unsafe_allow_html=True)
