@@ -7,8 +7,10 @@ Original file is located at
     https://colab.research.google.com/drive/1p4T9abuvwsDNvMaXhmqsRwPcotJ8oHpx
 """
 
-pip install streamlit scikit-learn xgboost pandas numpy matplotlib seaborn
+# Commented out IPython magic to ensure Python compatibility.
+# %pip install streamlit
 
+# Removed %%writefile app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
