@@ -31,12 +31,12 @@ st.markdown("""
             color: white; /* Ensure default text color is white */
         }}
         .stApp {{
-            background-color: #cb202d !important; /* Use !important to ensure override */
+            background-color: #A8232C !important; /* Use !important to ensure override */
             color: white;
         }}
         .stSidebar {{
-            background-color: white !important;
-            color: #cb202d !important;
+            background-color: #D8D8D8 !important; /* Light Gray */
+            color: #F5F5F5 !important; /* Warm White / Off White */
         }}
         .stSelectbox label, .stNumberInput label, .stButton>button {{
             color: white !important; /* Labels and button text in white */
@@ -50,13 +50,19 @@ st.markdown("""
          }}
         .prediction-card {{
             background-color: white;
-            color: #cb202d !important; /* Prediction card text in Zomato red */
+            color: #A8232C !important; /* Prediction card text in Zomato Dark Red */
             border-radius: 15px;
             padding: 20px;
             text-align: center;
             font-size: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }}
+
+        /* Ensure text within prediction cards is Zomato Dark Red */
+        .prediction-card b, .prediction-card {{
+            color: #A8232C !important;
+        }}
+
         h1, h2, h3, h4, h5, h6 {{
             text-align: center;
             font-family: 'Times New Roman', serif !important;
@@ -64,7 +70,7 @@ st.markdown("""
         }}
         /* More specific selector for the main content area */
         .main .block-container {{
-            background-color: #cb202d !important;
+            background-color: #A8232C !important;
             color: white;
         }}
         .css-j080pf, .css-10trgqc {{ /* Specific selectors for text elements */
@@ -139,6 +145,22 @@ except Exception as e:
     st.error(f"An error occurred during data loading or model training: {e}")
     data_loaded_and_models_trained = False
 
+# ----------------------------
+# Function to adjust prediction based on distance ranges
+# ----------------------------
+def adjust_prediction_by_distance(prediction, distance):
+    if distance >= 0 and distance <= 6:
+        # If prediction is less than 0, set to 0. If greater than 40, set to 40. Otherwise keep original.
+        return max(0, min(prediction, 40))
+    elif distance > 6 and distance <= 13:
+        # If prediction is less than 40, set to 40. If greater than 80, set to 80. Otherwise keep original.
+        return max(40, min(prediction, 80))
+    elif distance > 13 and distance <= 19.99:
+        # If prediction is less than 80, set to 80. If greater than 120, set to 120. Otherwise keep original.
+        return max(80, min(prediction, 120))
+    else:
+        return prediction # Return original prediction for distances outside these ranges
+
 
 # ----------------------------
 # 🧾 User Inputs
@@ -182,20 +204,25 @@ if data_loaded_and_models_trained:
 
 
     # ----------------------------
-    # 🎯 Predict
+    # 🎯 Predict and Adjust
     # ----------------------------
     if st.button("Predict Delivery Time"):
-        lin_pred = lin_model.predict(input_encoded)[0]
-        rf_pred = rf_model.predict(input_encoded)[0]
-        xgb_pred = xgb_model.predict(input_encoded)[0]
+        lin_pred_raw = lin_model.predict(input_encoded)[0]
+        rf_pred_raw = rf_model.predict(input_encoded)[0]
+        xgb_pred_raw = xgb_model.predict(input_encoded)[0]
+
+        # Adjust predictions based on distance ranges
+        lin_pred_adjusted = adjust_prediction_by_distance(lin_pred_raw, distance)
+        rf_pred_adjusted = adjust_prediction_by_distance(rf_pred_raw, distance)
+        xgb_pred_adjusted = adjust_prediction_by_distance(xgb_pred_raw, distance)
 
 
         st.markdown("<h2>🕒 Predicted Delivery Times</h2>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred:.2f} minutes</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred_adjusted:.2f} minutes</div>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred:.2f} minutes</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred_adjusted:.2f} minutes</div>", unsafe_allow_html=True)
         with col3:
-            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred:.2f} minutes</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred_adjusted:.2f} minutes</div>", unsafe_allow_html=True)
