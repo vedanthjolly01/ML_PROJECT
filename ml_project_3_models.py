@@ -93,7 +93,15 @@ try:
     min_rider_exp = float(data['Rider_Experience'].min())
     max_rider_exp = float(data['Rider_Experience'].max())
 
-    # Drop unnecessary columns after determining ranges
+    # Get unique values for categorical features from the dataset
+    traffic_options = data['Traffic'].unique().tolist()
+    weather_options = data['Weather'].unique().tolist()
+    time_of_day_options = data['Time_of_Day'].unique().tolist()
+    restaurant_popularity_options = data['Restaurant_Popularity'].unique().tolist()
+    vehicle_type_options = data['Vehicle_Type'].unique().tolist()
+
+
+    # Drop unnecessary columns after determining ranges and unique values
     cols_to_use = ['Distance_Km', 'Traffic', 'Weather', 'Time_of_Day',
                    'Restaurant_Popularity', 'Vehicle_Type', 'Rider_Experience', 'Delivery_Time']
     data = data[cols_to_use]
@@ -134,12 +142,12 @@ col1, col2 = st.columns(2)
 if data_loaded_and_models_trained:
     with col1:
         distance = st.number_input("Distance (in km)", min_value=min_distance, max_value=max_distance, value=min_distance + (max_distance - min_distance)/2.0, step=0.1)
-        traffic = st.selectbox("Traffic", ["Low", "Medium", "High"])
-        weather = st.selectbox("Weather", ["Clear", "Rainy", "Foggy"])
-        time_of_day = st.selectbox("Time of Day", ["Morning", "Afternoon", "Evening", "Night"])
+        traffic = st.selectbox("Traffic", traffic_options)
+        weather = st.selectbox("Weather", weather_options)
+        time_of_day = st.selectbox("Time of Day", time_of_day_options)
     with col2:
-        restaurant_popularity = st.selectbox("Restaurant Popularity", ["Low", "Medium", "High"])
-        vehicle_type = st.selectbox("Vehicle Type", ["Bike", "Scooter", "Cycle"]) # Assuming these are the only types in your data
+        restaurant_popularity = st.selectbox("Restaurant Popularity", restaurant_popularity_options)
+        vehicle_type = st.selectbox("Vehicle Type", vehicle_type_options)
         rider_exp = st.number_input("Rider Experience (Years)", min_value=min_rider_exp, max_value=max_rider_exp, value=min_rider_exp + (max_rider_exp - min_rider_exp)/2.0, step=0.1)
 
     # ----------------------------
