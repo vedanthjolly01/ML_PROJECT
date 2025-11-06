@@ -25,32 +25,48 @@ import xgboost as xgb
 st.set_page_config(page_title="Zomato Delivery Time Predictor", layout="centered")
 st.markdown("""
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+        html, body, [class*="st-"] {{
+            font-family: 'Times New Roman', serif !important;
+        }}
+        .stApp {{
             background-color: #cb202d;
             color: white;
-            font-family: 'Times New Roman', serif;
-        }
-        .stSidebar {
+        }}
+        .stSidebar {{
             background-color: white !important;
             color: #cb202d !important;
-        }
-        .stSelectbox label, .stNumberInput label {
-            color: white !important;
+        }}
+        .stSelectbox label, .stNumberInput label, .stButton>button {{
+            color: white !important; /* Labels and button text in white */
             font-size: 18px;
-        }
-        .prediction-card {
+        }}
+         .stSelectbox div[data-baseweb="select"] > div {{
+            color: #cb202d !important; /* Selected item in selectbox */
+        }}
+         .stTextInput>div>div>input {{
+            color: white !important; /* Input text in white */
+        }}
+        .prediction-card {{
             background-color: white;
-            color: #cb202d;
+            color: #cb202d !important; /* Prediction card text in Zomato red */
             border-radius: 15px;
             padding: 20px;
             text-align: center;
             font-size: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        h1, h2, h3 {
+        }}
+        h1, h2, h3, h4, h5, h6 {{
             text-align: center;
-            font-family: 'Times New Roman', serif;
-        }
+            font-family: 'Times New Roman', serif !important;
+            color: white !important; /* Headings in white */
+        }}
+        .css-j080pf, .css-10trgqc {{ /* Specific selectors for text elements */
+            color: white !important;
+        }}
+        .stMarkdown p {{
+            color: white !important; /* Ensure markdown text is white */
+        }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -61,84 +77,110 @@ st.markdown("<h1>🚴‍♂️ Zomato Delivery Time Predictor</h1>", unsafe_allo
 st.markdown("<h3>Predict your delivery time using three powerful ML models — fast, fresh, and on time!</h3>", unsafe_allow_html=True)
 
 # ----------------------------
-# 📦 Load Dataset
+# 📦 Load Dataset (for determining input ranges)
 # ----------------------------
-data = pd.read_csv("Zomato Delivery Prediction.csv")
-data = data.rename(columns={
-    'Distance_km': 'Distance_Km',
-    'Rider_Experience_years': 'Rider_Experience',
-    'Delivery_Time_min': 'Delivery_Time'
-})
+try:
+    data = pd.read_csv("Zomato Delivery Prediction.csv")
+    data = data.rename(columns={
+        'Distance_km': 'Distance_Km',
+        'Rider_Experience_years': 'Rider_Experience',
+        'Delivery_Time_min': 'Delivery_Time'
+    })
 
-# Drop unnecessary columns
-cols_to_use = ['Distance_Km', 'Traffic', 'Weather', 'Time_of_Day',
-               'Restaurant_Popularity', 'Vehicle_Type', 'Rider_Experience', 'Delivery_Time']
-data = data[cols_to_use]
+    # Determine min/max for input fields
+    min_distance = float(data['Distance_Km'].min())
+    max_distance = float(data['Distance_Km'].max())
+    min_rider_exp = float(data['Rider_Experience'].min())
+    max_rider_exp = float(data['Rider_Experience'].max())
 
-# Encode categorical columns
-categorical_cols = ['Traffic', 'Weather', 'Time_of_Day', 'Restaurant_Popularity', 'Vehicle_Type']
-x = data.drop('Delivery_Time', axis=1)
-y = data['Delivery_Time']
-x_encoded = pd.get_dummies(x, columns=categorical_cols, drop_first=True)
+    # Drop unnecessary columns after determining ranges
+    cols_to_use = ['Distance_Km', 'Traffic', 'Weather', 'Time_of_Day',
+                   'Restaurant_Popularity', 'Vehicle_Type', 'Rider_Experience', 'Delivery_Time']
+    data = data[cols_to_use]
 
-x_train, x_test, y_train, y_test = train_test_split(x_encoded, y, test_size=0.2, random_state=42)
+    # Encode categorical columns
+    categorical_cols = ['Traffic', 'Weather', 'Time_of_Day', 'Restaurant_Popularity', 'Vehicle_Type']
+    x = data.drop('Delivery_Time', axis=1)
+    y = data['Delivery_Time']
+    x_encoded = pd.get_dummies(x, columns=categorical_cols, drop_first=True)
 
-# ----------------------------
-# 🧠 Train Models
-# ----------------------------
-lin_model = LinearRegression().fit(x_train, y_train)
-rf_model = RandomForestRegressor(n_estimators=100, random_state=42).fit(x_train, y_train)
-dtrain = xgb.DMatrix(x_encoded, label=y)
-params = {'objective': 'reg:squarederror', 'eval_metric': 'rmse', 'max_depth': 3}
-xgb_model = xgb.train(params, dtrain, num_boost_round=50)
+    x_train, x_test, y_train, y_test = train_test_split(x_encoded, y, test_size=0.2, random_state=42)
+
+    # ----------------------------
+    # 🧠 Train Models
+    # ----------------------------
+    lin_model = LinearRegression().fit(x_train, y_train)
+    rf_model = RandomForestRegressor(n_estimators=100, random_state=42).fit(x_train, y_train)
+    dtrain = xgb.DMatrix(x_encoded, label=y)
+    params = {'objective': 'reg:squarederror', 'eval_metric': 'rmse', 'max_depth': 3}
+    xgb_model = xgb.train(params, dtrain, num_boost_round=50)
+
+    data_loaded_and_models_trained = True
+
+except FileNotFoundError:
+    st.error("Error: 'Zomato Delivery Prediction.csv' not found. Please make sure the file is in the correct directory.")
+    data_loaded_and_models_trained = False
+except Exception as e:
+    st.error(f"An error occurred during data loading or model training: {e}")
+    data_loaded_and_models_trained = False
+
 
 # ----------------------------
 # 🧾 User Inputs
 # ----------------------------
 st.subheader("📥 Enter Delivery Details")
 col1, col2 = st.columns(2)
-with col1:
-    distance = st.number_input("Distance (in km)", min_value=0.0, max_value=50.0, value=5.0)
-    traffic = st.selectbox("Traffic", ["Low", "Medium", "High"])
-    weather = st.selectbox("Weather", ["Clear", "Rainy", "Foggy"])
-    time_of_day = st.selectbox("Time of Day", ["Morning", "Afternoon", "Evening", "Night"])
-with col2:
-    restaurant_popularity = st.selectbox("Restaurant Popularity", ["Low", "Medium", "High"])
-    vehicle_type = st.selectbox("Vehicle Type", ["Bike", "Scooter", "Cycle"])
-    rider_exp = st.number_input("Rider Experience (Years)", min_value=0.0, max_value=10.0, value=2.0)
 
-# ----------------------------
-# 🔍 Prepare Input for Prediction
-# ----------------------------
-input_dict = {
-    'Distance_Km': [distance],
-    'Rider_Experience': [rider_exp],
-    'Traffic': [traffic],
-    'Weather': [weather],
-    'Time_of_Day': [time_of_day],
-    'Restaurant_Popularity': [restaurant_popularity],
-    'Vehicle_Type': [vehicle_type]
-}
-input_df = pd.DataFrame(input_dict)
-input_encoded = pd.get_dummies(input_df, columns=categorical_cols, drop_first=True)
-
-# Align input with training data
-input_encoded = input_encoded.reindex(columns=x_encoded.columns, fill_value=0)
-
-# ----------------------------
-# 🎯 Predict
-# ----------------------------
-if st.button("Predict Delivery Time"):
-    lin_pred = lin_model.predict(input_encoded)[0]
-    rf_pred = rf_model.predict(input_encoded)[0]
-    xgb_pred = xgb_model.predict(xgb.DMatrix(input_encoded))[0]
-
-    st.markdown("<h2>🕒 Predicted Delivery Times</h2>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
-
+if data_loaded_and_models_trained:
     with col1:
-        st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred:.2f} minutes</div>", unsafe_allow_html=True)
+        distance = st.number_input("Distance (in km)", min_value=min_distance, max_value=max_distance, value=min_distance + (max_distance - min_distance)/2.0, step=0.1)
+        traffic = st.selectbox("Traffic", ["Low", "Medium", "High"])
+        weather = st.selectbox("Weather", ["Clear", "Rainy", "Foggy"])
+        time_of_day = st.selectbox("Time of Day", ["Morning", "Afternoon", "Evening", "Night"])
     with col2:
-        st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred:.2f} minutes</div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred:.2f} minutes</div>", unsafe_allow_html=True)
+        restaurant_popularity = st.selectbox("Restaurant Popularity", ["Low", "Medium", "High"])
+        vehicle_type = st.selectbox("Vehicle Type", ["Bike", "Scooter", "Cycle"]) # Assuming these are the only types in your data
+        rider_exp = st.number_input("Rider Experience (Years)", min_value=min_rider_exp, max_value=max_rider_exp, value=min_rider_exp + (max_rider_exp - min_rider_exp)/2.0, step=0.1)
+
+    # ----------------------------
+    # 🔍 Prepare Input for Prediction
+    # ----------------------------
+    input_dict = {
+        'Distance_Km': [distance],
+        'Rider_Experience': [rider_exp],
+        'Traffic': [traffic],
+        'Weather': [weather],
+        'Time_of_Day': [time_of_day],
+        'Restaurant_Popularity': [restaurant_popularity],
+        'Vehicle_Type': [vehicle_type]
+    }
+    input_df = pd.DataFrame(input_dict)
+    input_encoded = pd.get_dummies(input_df, columns=categorical_cols, drop_first=True)
+
+    # Ensure all columns from training data are present in input data
+    for col in x_encoded.columns:
+        if col not in input_encoded.columns:
+            input_encoded[col] = 0
+
+    # Align input with training data columns order
+    input_encoded = input_encoded[x_encoded.columns]
+
+
+    # ----------------------------
+    # 🎯 Predict
+    # ----------------------------
+    if st.button("Predict Delivery Time"):
+        lin_pred = lin_model.predict(input_encoded)[0]
+        rf_pred = rf_model.predict(input_encoded)[0]
+        xgb_pred = xgb_model.predict(xgb.DMatrix(input_encoded))[0]
+
+
+        st.markdown("<h2>🕒 Predicted Delivery Times</h2>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.markdown(f"<div class='prediction-card'><b>Linear Regression</b><br>{lin_pred:.2f} minutes</div>", unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"<div class='prediction-card'><b>Random Forest</b><br>{rf_pred:.2f} minutes</div>", unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"<div class='prediction-card'><b>XGBoost</b><br>{xgb_pred:.2f} minutes</div>", unsafe_allow_html=True)
