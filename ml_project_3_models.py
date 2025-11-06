@@ -28,9 +28,10 @@ st.markdown("""
         @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
         html, body, [class*="st-"] {{
             font-family: 'Times New Roman', serif !important;
+            color: white; /* Ensure default text color is white */
         }}
         .stApp {{
-            background-color: #cb202d;
+            background-color: #cb202d !important; /* Use !important to ensure override */
             color: white;
         }}
         .stSidebar {{
@@ -46,7 +47,7 @@ st.markdown("""
         }}
          .stTextInput>div>div>input {{
             color: white !important; /* Input text in white */
-        }}
+         }}
         .prediction-card {{
             background-color: white;
             color: #cb202d !important; /* Prediction card text in Zomato red */
@@ -60,6 +61,11 @@ st.markdown("""
             text-align: center;
             font-family: 'Times New Roman', serif !important;
             color: white !important; /* Headings in white */
+        }}
+        /* More specific selector for the main content area */
+        .main .block-container {{
+            background-color: #cb202d !important;
+            color: white;
         }}
         .css-j080pf, .css-10trgqc {{ /* Specific selectors for text elements */
             color: white !important;
@@ -119,9 +125,10 @@ try:
     # ----------------------------
     lin_model = LinearRegression().fit(x_train, y_train)
     rf_model = RandomForestRegressor(n_estimators=100, random_state=42).fit(x_train, y_train)
-    dtrain = xgb.DMatrix(x_encoded, label=y)
-    params = {'objective': 'reg:squarederror', 'eval_metric': 'rmse', 'max_depth': 3}
-    xgb_model = xgb.train(params, dtrain, num_boost_round=50)
+    # For XGBoost, train on the encoded training data
+    xgb_model = xgb.XGBRegressor(objective='reg:squarederror', eval_metric='rmse', max_depth=3, n_estimators=50, random_state=42)
+    xgb_model.fit(x_train, y_train)
+
 
     data_loaded_and_models_trained = True
 
@@ -180,7 +187,7 @@ if data_loaded_and_models_trained:
     if st.button("Predict Delivery Time"):
         lin_pred = lin_model.predict(input_encoded)[0]
         rf_pred = rf_model.predict(input_encoded)[0]
-        xgb_pred = xgb_model.predict(xgb.DMatrix(input_encoded))[0]
+        xgb_pred = xgb_model.predict(input_encoded)[0]
 
 
         st.markdown("<h2>🕒 Predicted Delivery Times</h2>", unsafe_allow_html=True)
